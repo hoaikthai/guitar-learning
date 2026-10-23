@@ -43,7 +43,9 @@
   .home-head h1 { margin: 0; font-size: 28px; letter-spacing: -.02em; }
   .tagline { color: var(--muted); margin: 0 0 28px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  /* Each card spans 4 shared rows (tag / title / composer / meta) so the parts line up across a row */
   .card {
+    display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; align-items: start;
     text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
     padding: 16px 18px 18px; transition: transform .12s, border-color .12s; position: relative;
   }
@@ -56,10 +58,14 @@
   .lvl-custom { background: #26304a; color: #9db8ff; }
   .card-title { font-size: 18px; font-weight: 650; margin-bottom: 2px; }
   .card-sub { color: var(--muted); font-size: 13px; }
-  .card-meta { color: var(--muted); font-size: 12px; margin-top: 12px; font-variant-numeric: tabular-nums; }
+  .card-meta { color: var(--muted); font-size: 12px; margin-top: 12px; font-variant-numeric: tabular-nums; align-self: end; }
   .del { color: var(--muted); padding: 2px 6px; border-radius: 6px; }
   .del:hover { background: var(--panel2); color: var(--text); }
-  .card.add { border-style: dashed; display: grid; place-items: center; color: var(--muted); min-height: 140px; text-align: center; }
+  .card.add { border-style: dashed; color: var(--muted); min-height: 140px; text-align: center; }
+  .card.add > div { grid-row: 1 / -1; place-self: center; }
+  .lang-switch { display: inline-flex; margin-left: auto; border: 1px solid var(--line); border-radius: 99px; padding: 2px; background: var(--panel); flex-shrink: 0; }
+  .lang-switch button { border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 650; padding: 4px 10px; border-radius: 99px; }
+  .lang-switch button.on { background: var(--accent); color: var(--accent-ink); }
 
   /* ---------- Player ---------- */
   #player { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
@@ -179,34 +185,36 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a0f0a" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/><circle cx="10" cy="10" r="2.4" fill="#1a0f0a"/></svg>
     </div>
     <h1>Fretwise</h1>
+    <div class="lang-switch"></div>
   </div>
-  <p class="tagline">Pick a song. Read the notes, see the frets, play along at your own speed.</p>
+  <p class="tagline" data-i18n="tagline"></p>
   <div id="songGrid" class="grid"></div>
 </section>
 
 <!-- ============ Player ============ -->
 <section id="player" class="hidden">
   <header class="bar">
-    <button id="backBtn" class="btn">‹ Songs</button>
+    <button id="backBtn" class="btn" data-i18n="back"></button>
     <div class="title"><div id="pTitle"></div><div id="pSub"></div></div>
+    <div class="lang-switch"></div>
   </header>
 
   <div class="controls">
     <div class="transport">
-      <button id="prevBtn" class="btn icon-btn" title="Previous note (←)">
+      <button id="prevBtn" class="btn icon-btn" data-i18n-title="prevTip">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h2v12H3zM14 2v12L6 8z"/></svg>
       </button>
-      <button id="playBtn" class="play" title="Play / pause (Space)"></button>
-      <button id="nextBtn" class="btn icon-btn" title="Next note (→)">
+      <button id="playBtn" class="play" data-i18n-title="playTip"></button>
+      <button id="nextBtn" class="btn icon-btn" data-i18n-title="nextTip">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M11 2h2v12h-2zM2 2v12l8-6z"/></svg>
       </button>
-      <button id="stopBtn" class="btn icon-btn" title="Back to start">
+      <button id="stopBtn" class="btn icon-btn" data-i18n-title="stopTip">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect width="14" height="14" rx="2"/></svg>
       </button>
     </div>
 
     <div class="speed">
-      <label for="speed">Speed</label>
+      <label for="speed" data-i18n="speed"></label>
       <input id="speed" type="range" min="0.2" max="1.5" step="0.05" value="1">
       <output id="speedOut">1.00×</output>
       <span id="bpmOut"></span>
@@ -214,10 +222,10 @@
     </div>
 
     <div class="toggles">
-      <button id="metroBtn" class="btn tog">Metronome</button>
-      <button id="countBtn" class="btn tog on">Count-in</button>
-      <button id="loopBtn" class="btn tog">Loop</button>
-      <span id="loopRange" class="off">bars <select id="loopA"></select> – <select id="loopB"></select></span>
+      <button id="metroBtn" class="btn tog" data-i18n="metronome"></button>
+      <button id="countBtn" class="btn tog on" data-i18n="countIn"></button>
+      <button id="loopBtn" class="btn tog" data-i18n="loop"></button>
+      <span id="loopRange" class="off"><span data-i18n="bars"></span> <select id="loopA"></select> – <select id="loopB"></select></span>
     </div>
   </div>
 
@@ -229,34 +237,29 @@
   <footer id="fretPanel">
     <div class="now"><span id="nowTxt"></span><span id="nextTxt"></span></div>
     <svg id="fretSvg" viewBox="0 0 1000 196" xmlns="http://www.w3.org/2000/svg"></svg>
-    <div class="hint">Tap any note on the sheet to jump there · Space = play/pause · ← → = step note by note</div>
+    <div class="hint" data-i18n="hint"></div>
   </footer>
 </section>
 
 <!-- ============ Custom song modal ============ -->
 <div id="modal" class="modal hidden">
   <form class="sheet-form" id="songForm">
-    <h2>Add your own song</h2>
+    <h2 data-i18n="addSong"></h2>
     <div class="row">
-      <div class="field" style="flex:2"><label class="lbl">Title</label><input id="fTitle" required placeholder="My melody"></div>
-      <div class="field"><label class="lbl">Tempo (BPM)</label><input id="fBpm" type="number" min="30" max="240" value="90"></div>
-      <div class="field"><label class="lbl">Time</label>
+      <div class="field" style="flex:2"><label class="lbl" data-i18n="fTitle"></label><input id="fTitle" required data-i18n-ph="fTitlePh"></div>
+      <div class="field"><label class="lbl" data-i18n="fTempo"></label><input id="fBpm" type="number" min="30" max="240" value="90"></div>
+      <div class="field"><label class="lbl" data-i18n="fTime"></label>
         <select id="fTime"><option value="4/4">4/4</option><option value="3/4">3/4</option><option value="2/4">2/4</option></select>
       </div>
     </div>
-    <div class="field"><label class="lbl">Notes</label>
+    <div class="field"><label class="lbl" data-i18n="fNotes"></label>
       <textarea id="fNotes" placeholder="E4q E4q F4q G4q | G4q F4q E4q D4q | C4h C4h"></textarea>
     </div>
-    <p class="help">
-      Each note is <code>pitch + octave + length</code>, bars split by <code>|</code>.
-      Lengths: <code>w</code> whole, <code>h</code> half, <code>q</code> quarter, <code>e</code> eighth, <code>s</code> sixteenth; add <code>.</code> for dotted.
-      Sharps/flats: <code>F#4q</code>, <code>Bb3e</code>. Rests: <code>rq</code>, <code>rh</code>.
-      Written guitar pitch (sounds an octave lower), range E3–E6.
-    </p>
+    <p class="help" data-i18n-html="fHelp"></p>
     <div class="err" id="fErr"></div>
     <div class="actions">
-      <button type="button" class="btn" id="fCancel">Cancel</button>
-      <button type="submit" class="btn primary">Save song</button>
+      <button type="button" class="btn" id="fCancel" data-i18n="cancel"></button>
+      <button type="submit" class="btn primary" data-i18n="save"></button>
     </div>
   </form>
 </div>
@@ -267,18 +270,18 @@
    Token: <Letter>[#|b]<octave><w|h|q|e|s>[.]   rest: r<len>[.]   bar: |
    ===================================================================== */
 const SONGS = [
-  { id: 'cmaj', title: 'C Major Scale', composer: 'Exercise', level: 'Beginner', bpm: 80, time: [4, 4],
+  { id: 'cmaj', title: 'C Major Scale', titleVi: 'Gam Đô trưởng', composer: 'Exercise', level: 'Beginner', bpm: 80, time: [4, 4],
     notes: `C4q D4q E4q F4q | G4q A4q B4q C5q | C5q B4q A4q G4q | F4q E4q D4q C4q | C4w` },
-  { id: 'twinkle', title: 'Twinkle Twinkle Little Star', composer: 'Traditional', level: 'Beginner', bpm: 90, time: [4, 4],
+  { id: 'twinkle', title: 'Twinkle Twinkle Little Star', titleVi: 'Ngôi sao lấp lánh', composer: 'Traditional', level: 'Beginner', bpm: 90, time: [4, 4],
     notes: `C4q C4q G4q G4q | A4q A4q G4h | F4q F4q E4q E4q | D4q D4q C4h | G4q G4q F4q F4q | E4q E4q D4h |
             G4q G4q F4q F4q | E4q E4q D4h | C4q C4q G4q G4q | A4q A4q G4h | F4q F4q E4q E4q | D4q D4q C4h` },
-  { id: 'ode', title: 'Ode to Joy', composer: 'L. van Beethoven', level: 'Beginner', bpm: 100, time: [4, 4],
+  { id: 'ode', title: 'Ode to Joy', titleVi: 'Khúc hoan ca', composer: 'L. van Beethoven', level: 'Beginner', bpm: 100, time: [4, 4],
     notes: `E4q E4q F4q G4q | G4q F4q E4q D4q | C4q C4q D4q E4q | E4q. D4e D4h |
             E4q E4q F4q G4q | G4q F4q E4q D4q | C4q C4q D4q E4q | D4q. C4e C4h` },
-  { id: 'frere', title: 'Frère Jacques', composer: 'Traditional', level: 'Beginner', bpm: 110, time: [4, 4],
+  { id: 'frere', title: 'Frère Jacques', titleVi: 'Frère Jacques (Kìa con bướm vàng)', composer: 'Traditional', level: 'Beginner', bpm: 110, time: [4, 4],
     notes: `C4q D4q E4q C4q | C4q D4q E4q C4q | E4q F4q G4h | E4q F4q G4h |
             G4e A4e G4e F4e E4q C4q | G4e A4e G4e F4e E4q C4q | C4q G3q C4h | C4q G3q C4h` },
-  { id: 'bday', title: 'Happy Birthday', composer: 'Mildred & Patty Hill', level: 'Easy', bpm: 100, time: [3, 4],
+  { id: 'bday', title: 'Happy Birthday', titleVi: 'Chúc mừng sinh nhật', composer: 'Mildred & Patty Hill', level: 'Easy', bpm: 100, time: [3, 4],
     notes: `G4e G4e | A4q G4q C5q | B4h G4e G4e | A4q G4q D5q | C5h G4e G4e |
             G5q E5q C5q | B4q A4q F5e F5e | E5q C5q D5q | C5h.` },
   { id: 'saints', title: 'When the Saints Go Marching In', composer: 'Traditional', level: 'Easy', bpm: 120, time: [4, 4],
@@ -288,6 +291,81 @@ const SONGS = [
     notes: `A4q | C5h D5q | E5q. F5e E5q | D5h B4q | G4q. A4e B4q | C5h A4q | A4q. G#4e A4q | B4h G#4q | E4h A4q |
             C5h D5q | E5q. F5e E5q | D5h B4q | G4q. A4e B4q | C5q. B4e A4q | G#4q. F#4e G#4q | A4h.` },
 ];
+
+/* ============================== i18n ============================== */
+const I18N = {
+  en: {
+    tagline: 'Pick a song. Read the notes, see the frets, play along at your own speed.',
+    back: '‹ Songs',
+    prevTip: 'Previous note (←)', nextTip: 'Next note (→)', playTip: 'Play / pause (Space)', stopTip: 'Back to start',
+    speed: 'Speed', metronome: 'Metronome', countIn: 'Count-in', loop: 'Loop', bars: 'bars',
+    hint: 'Tap any note on the sheet to jump there · Space = play/pause · ← → = step note by note',
+    addSong: 'Add your own song', fTitle: 'Title', fTitlePh: 'My melody', fTempo: 'Tempo (BPM)', fTime: 'Time', fNotes: 'Notes',
+    fHelp: `Each note is <code>pitch + octave + length</code>, bars split by <code>|</code>.
+      Lengths: <code>w</code> whole, <code>h</code> half, <code>q</code> quarter, <code>e</code> eighth, <code>s</code> sixteenth; add <code>.</code> for dotted.
+      Sharps/flats: <code>F#4q</code>, <code>Bb3e</code>. Rests: <code>rq</code>, <code>rh</code>.
+      Written guitar pitch (sounds an octave lower), range E3–E6.`,
+    cancel: 'Cancel', save: 'Save song', untitled: 'Untitled', del: 'Delete',
+    'level.Beginner': 'Beginner', 'level.Easy': 'Easy', 'level.Intermediate': 'Intermediate', 'level.Custom': 'Custom',
+    errToken: 'Bar {bar}: can\'t read "{tok}"', errEmpty: 'No notes found',
+    rest: 'Rest', restHint: 'let it ring / mute', outOfRange: 'out of guitar range',
+    next: 'Next: {v}', lastNote: 'Last note',
+    string: 'String {n} ({name})', fret: 'fret {n}', open: 'open',
+  },
+  vi: {
+    tagline: 'Chọn một bài hát. Đọc nốt nhạc, xem vị trí phím và chơi theo tốc độ của bạn.',
+    back: '‹ Bài hát',
+    prevTip: 'Nốt trước (←)', nextTip: 'Nốt sau (→)', playTip: 'Phát / tạm dừng (phím cách)', stopTip: 'Về đầu bài',
+    speed: 'Tốc độ', metronome: 'Máy gõ nhịp', countIn: 'Đếm trước', loop: 'Lặp đoạn', bars: 'ô nhịp',
+    hint: 'Chạm vào nốt bất kỳ để nhảy đến đó · Phím cách = phát/tạm dừng · ← → = đi từng nốt',
+    addSong: 'Thêm bài hát của bạn', fTitle: 'Tên bài', fTitlePh: 'Giai điệu của tôi', fTempo: 'Nhịp độ (BPM)', fTime: 'Nhịp', fNotes: 'Nốt nhạc',
+    fHelp: `Mỗi nốt gồm <code>tên nốt + quãng tám + trường độ</code>, các ô nhịp ngăn cách bằng <code>|</code>.
+      Trường độ: <code>w</code> tròn, <code>h</code> trắng, <code>q</code> đen, <code>e</code> móc đơn, <code>s</code> móc kép; thêm <code>.</code> cho nốt chấm dôi.
+      Thăng/giáng: <code>F#4q</code>, <code>Bb3e</code>. Dấu lặng: <code>rq</code>, <code>rh</code>.
+      Ghi theo cao độ viết của guitar (âm thanh thấp hơn một quãng tám), trong tầm E3–E6.`,
+    cancel: 'Hủy', save: 'Lưu bài hát', untitled: 'Không tên', del: 'Xóa',
+    'level.Beginner': 'Mới bắt đầu', 'level.Easy': 'Dễ', 'level.Intermediate': 'Trung cấp', 'level.Custom': 'Tự tạo',
+    errToken: 'Ô nhịp {bar}: không đọc được "{tok}"', errEmpty: 'Không tìm thấy nốt nào',
+    rest: 'Nghỉ', restHint: 'để ngân / chặn dây', outOfRange: 'ngoài tầm đàn guitar',
+    next: 'Tiếp: {v}', lastNote: 'Nốt cuối',
+    string: 'Dây {n} ({name})', fret: 'phím {n}', open: 'buông',
+    'composer.Exercise': 'Bài tập', 'composer.Traditional': 'Dân gian', 'composer.Traditional English': 'Dân ca Anh',
+    'composer.Your song': 'Bài của bạn',
+  },
+};
+let lang = (() => { try { return localStorage.getItem('fretwise.lang'); } catch { return null; } })() === 'vi' ? 'vi' : 'en';
+
+function t(key, vars) {
+  const s = I18N[lang][key] ?? I18N.en[key] ?? key;
+  return vars ? s.replace(/\{(\w+)\}/g, (_, k) => vars[k]) : s;
+}
+const songTitle = s => (lang === 'vi' && s.titleVi) || s.title;
+const songComposer = s => I18N[lang]['composer.' + s.composer] ?? s.composer;
+const songSub = s => `${songComposer(s)} · ${s.time.join('/')} · ${s.bpm} BPM`;
+
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el => el.innerHTML = t(el.dataset.i18nHtml));
+  document.querySelectorAll('[data-i18n-title]').forEach(el => el.title = t(el.dataset.i18nTitle));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.dataset.i18nPh));
+  document.querySelectorAll('.lang-switch button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+  renderHome();
+  renderFretboard();
+  if (state.song) {
+    $('#pTitle').textContent = songTitle(state.song);
+    $('#pSub').textContent = songSub(state.song);
+    const i = state.cur;
+    state.cur = -1;
+    if (i >= 0) updateActive(i);
+  }
+}
+
+function setLang(l) {
+  lang = l;
+  try { localStorage.setItem('fretwise.lang', l); } catch {}
+  applyLang();
+}
 
 /* ===================== Parsing & fret assignment ===================== */
 const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
@@ -304,7 +382,7 @@ function parseSong(song) {
     const m = { index: mi, start: beat, notes: [] };
     txt.split(/\s+/).forEach(tok => {
       const r = /^(?:([A-G])([#b]?)(\d)|r)([whqes])(\.?)$/.exec(tok);
-      if (!r) throw new Error(`Bar ${mi + 1}: can't read "${tok}"`);
+      if (!r) throw new Error(t('errToken', { bar: mi + 1, tok }));
       const n = { beat, dur: DUR[r[4]] * (r[5] ? 1.5 : 1), type: r[4], dotted: !!r[5], rest: !r[1], measure: mi };
       if (r[1]) {
         n.letter = r[1]; n.acc = r[2]; n.octave = +r[3];
@@ -318,7 +396,7 @@ function parseSong(song) {
     m.end = beat;
     measures.push(m);
   });
-  if (!notes.length) throw new Error('No notes found');
+  if (!notes.length) throw new Error(t('errEmpty'));
   notes.forEach((n, i) => n.i = i);
   assignFrets(notes.filter(n => !n.rest));
   return {
@@ -446,10 +524,10 @@ function renderHome() {
     const card = document.createElement('button');
     card.className = 'card';
     card.innerHTML = `
-      <div class="card-top"><span class="lvl lvl-${esc(s.level.toLowerCase())}">${esc(s.level)}</span>
-        ${s.custom ? `<span class="del" data-del="${esc(s.id)}" title="Delete">✕</span>` : ''}</div>
-      <div class="card-title">${esc(s.title)}</div>
-      <div class="card-sub">${esc(s.composer)}</div>
+      <div class="card-top"><span class="lvl lvl-${esc(s.level.toLowerCase())}">${esc(t('level.' + s.level))}</span>
+        ${s.custom ? `<span class="del" data-del="${esc(s.id)}" title="${esc(t('del'))}">✕</span>` : ''}</div>
+      <div class="card-title">${esc(songTitle(s))}</div>
+      <div class="card-sub">${esc(songComposer(s))}</div>
       <div class="card-meta">${s.time.join('/')} · ${s.bpm} BPM</div>`;
     card.onclick = e => {
       const del = e.target.dataset.del;
@@ -460,7 +538,7 @@ function renderHome() {
   });
   const add = document.createElement('button');
   add.className = 'card add';
-  add.innerHTML = '<div><div style="font-size:28px">＋</div>Add your own song</div>';
+  add.innerHTML = `<div><div style="font-size:28px">＋</div>${esc(t('addSong'))}</div>`;
   add.onclick = () => { $('#fErr').textContent = ''; $('#modal').classList.remove('hidden'); $('#fTitle').focus(); };
   grid.appendChild(add);
 }
@@ -470,7 +548,7 @@ $('#songForm').onsubmit = e => {
   e.preventDefault();
   const song = {
     id: 'c' + Date.now(), custom: true, level: 'Custom', composer: 'Your song',
-    title: $('#fTitle').value.trim() || 'Untitled',
+    title: $('#fTitle').value.trim() || t('untitled'),
     bpm: Math.min(240, Math.max(30, +$('#fBpm').value || 90)),
     time: $('#fTime').value.split('/').map(Number),
     notes: $('#fNotes').value,
@@ -492,8 +570,8 @@ function openSong(song) {
   const opts = ms.map((m, i) => `<option value="${i}">${i + 1}</option>`).join('');
   $('#loopA').innerHTML = opts; $('#loopB').innerHTML = opts;
   $('#loopA').value = state.loopA; $('#loopB').value = state.loopB;
-  $('#pTitle').textContent = song.title;
-  $('#pSub').textContent = `${song.composer} · ${song.time.join('/')} · ${song.bpm} BPM`;
+  $('#pTitle').textContent = songTitle(song);
+  $('#pSub').textContent = songSub(song);
   $('#home').classList.add('hidden');
   $('#player').classList.remove('hidden');
   syncToggles();
@@ -668,7 +746,7 @@ function renderFretboard() {
     s += `<text class="fnum" x="${(fretX(f - 1) + fretX(f)) / 2}" y="${bBot + 20}">${f}</text>`;
   }
   s += `<line class="nut" x1="${FB.nut}" x2="${FB.nut}" y1="${bTop}" y2="${bBot}"/>`;
-  s += `<text class="fnum" x="${FB.openX}" y="${bBot + 20}">open</text>`;
+  s += `<text class="fnum" x="${FB.openX}" y="${bBot + 20}">${t('open')}</text>`;
   const thick = [1.2, 1.5, 1.9, 2.4, 2.9, 3.4];
   for (let i = 0; i < 6; i++) {
     s += `<text class="snm" id="snm${i}" x="${FB.labelX}" y="${strY(i)}">${STRING_NAMES[i]}</text>`;
@@ -687,7 +765,7 @@ function placeMarker(el, pos) {
   el.classList.remove('hide');
 }
 
-const posLabel = p => `String ${p.string + 1} (${STRING_NAMES[p.string]}) · ${p.fret === 0 ? 'open' : 'fret ' + p.fret}`;
+const posLabel = p => `${t('string', { n: p.string + 1, name: STRING_NAMES[p.string] })} · ${p.fret === 0 ? t('open') : t('fret', { n: p.fret })}`;
 
 /* --------------------------- Position & highlight --------------------------- */
 function indexAt(beat) {
@@ -726,9 +804,9 @@ function updateActive(i) {
     $('#snm' + s).classList.toggle('on', on);
   }
 
-  $('#nowTxt').innerHTML = n.rest ? '<b>Rest</b> let it ring / mute'
-    : n.pos ? `<b>${n.name}</b>${posLabel(n.pos)}` : `<b>${n.name}</b>out of guitar range`;
-  $('#nextTxt').textContent = next ? `Next: ${next.name}${next.pos ? ' · ' + posLabel(next.pos) : ''}` : 'Last note';
+  $('#nowTxt').innerHTML = n.rest ? `<b>${t('rest')}</b>${t('restHint')}`
+    : `<b>${n.name}</b>${n.pos ? posLabel(n.pos) : t('outOfRange')}`;
+  $('#nextTxt').textContent = next ? t('next', { v: next.name + (next.pos ? ' · ' + posLabel(next.pos) : '') }) : t('lastNote');
 
   // keep the active system in view
   const box = $('#sheet'), top = state.parsed.layout.rowTop[state.parsed.layout.noteRow[i]] + 14;
@@ -935,9 +1013,12 @@ window.addEventListener('resize', () => {
 });
 
 /* --------------------------- Boot --------------------------- */
+document.querySelectorAll('.lang-switch').forEach(el => {
+  el.innerHTML = '<button data-lang="en" title="English">EN</button><button data-lang="vi" title="Tiếng Việt">VI</button>';
+  el.onclick = e => { const l = e.target.dataset.lang; if (l && l !== lang) setLang(l); };
+});
 setPlayIcon(false);
-renderFretboard();
-renderHome();
+applyLang();
 measureClef();
 { const linked = SONGS.find(s => s.id === location.hash.slice(1)); if (linked) openSong(linked); }  // e.g. index.html#ode
 document.fonts?.load('40px "Noto Music"', '\u{1D11E}').then(() => {
